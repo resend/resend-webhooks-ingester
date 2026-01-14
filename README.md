@@ -7,6 +7,7 @@ A self-hosted webhook ingester for [Resend](https://resend.com) that stores emai
 - Receives and verifies Resend webhooks using Svix signatures
 - Stores all webhook events in your database (append-only log)
 - Supports all Resend event types: emails, contacts, and domains
+- Idempotent event storage (duplicate webhooks are safely ignored)
 - Type-safe with full TypeScript support
 - Multiple database connectors available
 
@@ -301,6 +302,86 @@ Receives and stores Resend webhook events.
 - **Use environment variables** - Never commit secrets to your repository
 - **Use service role keys carefully** - Keys that bypass RLS should only be used server-side
 - **HTTPS only** - Always use HTTPS in production
+
+## Data Retention
+
+By default, webhook events are stored **indefinitely**. This gives you complete historical data for analytics and auditing.
+
+If you need to limit data retention, you can set up scheduled jobs to delete old events. Below are example queries to delete events older than a specified number of days.
+
+### PostgreSQL / Supabase
+
+```sql
+-- Delete email events older than 90 days
+DELETE FROM resend_wh_emails
+WHERE event_created_at < NOW() - INTERVAL '90 days';
+
+-- Delete contact events older than 90 days
+DELETE FROM resend_wh_contacts
+WHERE event_created_at < NOW() - INTERVAL '90 days';
+
+-- Delete domain events older than 90 days
+DELETE FROM resend_wh_domains
+WHERE event_created_at < NOW() - INTERVAL '90 days';
+```
+
+For Supabase, you can use [pg_cron](https://supabase.com/docs/guides/database/extensions/pg_cron) to schedule these queries.
+
+### MySQL / PlanetScale
+
+```sql
+-- Delete email events older than 90 days
+DELETE FROM resend_wh_emails
+WHERE event_created_at < DATE_SUB(NOW(), INTERVAL 90 DAY);
+
+-- Delete contact events older than 90 days
+DELETE FROM resend_wh_contacts
+WHERE event_created_at < DATE_SUB(NOW(), INTERVAL 90 DAY);
+
+-- Delete domain events older than 90 days
+DELETE FROM resend_wh_domains
+WHERE event_created_at < DATE_SUB(NOW(), INTERVAL 90 DAY);
+```
+
+### BigQuery
+
+```sql
+-- Delete email events older than 90 days
+DELETE FROM `your_project.your_dataset.resend_wh_emails`
+WHERE event_created_at < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 90 DAY);
+```
+
+You can also set up [partition expiration](https://cloud.google.com/bigquery/docs/managing-partitioned-tables#partition-expiration) on your tables.
+
+### Snowflake
+
+```sql
+-- Delete email events older than 90 days
+DELETE FROM resend_wh_emails
+WHERE event_created_at < DATEADD(day, -90, CURRENT_TIMESTAMP());
+```
+
+You can use [Snowflake Tasks](https://docs.snowflake.com/en/user-guide/tasks-intro) to schedule cleanup.
+
+### ClickHouse
+
+```sql
+-- Delete email events older than 90 days
+ALTER TABLE resend_wh_emails DELETE
+WHERE event_created_at < now() - INTERVAL 90 DAY;
+```
+
+Alternatively, use [TTL expressions](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-ttl) in your table definition for automatic cleanup.
+
+## Example Queries
+
+See [`queries_examples.md`](./queries_examples.md) for useful analytics queries including:
+- Email status counts by day
+- Bounce rates
+- Open rates
+- Click-through rates
+- Contact growth tracking
+- Most clicked links
 
 ## Troubleshooting
 

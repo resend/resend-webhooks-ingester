@@ -6,6 +6,9 @@ CREATE TABLE IF NOT EXISTS resend_wh_emails (
   -- Primary key for each webhook event (auto-generated)
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+  -- Svix ID for idempotency (unique to prevent duplicate webhook processing)
+  svix_id TEXT NOT NULL UNIQUE,
+
   -- Webhook metadata
   event_type TEXT NOT NULL,
   webhook_received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -47,6 +50,9 @@ CREATE TABLE IF NOT EXISTS resend_wh_contacts (
   -- Primary key for each webhook event (auto-generated)
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+  -- Svix ID for idempotency (unique to prevent duplicate webhook processing)
+  svix_id TEXT NOT NULL UNIQUE,
+
   -- Webhook metadata
   event_type TEXT NOT NULL,
   webhook_received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -75,6 +81,9 @@ CREATE INDEX IF NOT EXISTS idx_resend_wh_contacts_email ON resend_wh_contacts(em
 CREATE TABLE IF NOT EXISTS resend_wh_domains (
   -- Primary key for each webhook event (auto-generated)
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Svix ID for idempotency (unique to prevent duplicate webhook processing)
+  svix_id TEXT NOT NULL UNIQUE,
 
   -- Webhook metadata
   event_type TEXT NOT NULL,

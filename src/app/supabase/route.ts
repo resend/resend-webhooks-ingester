@@ -2,6 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { verifyWebhook, type WebhookHeaders } from '@/lib/verify-webhook';
 import {
+  prepareContactEventData,
+  prepareDomainEventData,
+  prepareEmailEventData,
+} from '@/lib/webhook-handler';
+import {
   type ContactWebhookEvent,
   type DomainWebhookEvent,
   type EmailWebhookEvent,
@@ -26,31 +31,17 @@ type SupabaseClient = ReturnType<typeof getSupabaseClient>;
 async function insertEmailEvent(
   supabase: SupabaseClient,
   event: EmailWebhookEvent,
+  svixId: string,
 ) {
-  const { data: eventData, type, created_at } = event;
+  const data = prepareEmailEventData(event);
 
-  const { error } = await supabase.from('resend_wh_emails').insert({
-    event_type: type,
-    event_created_at: created_at,
-    email_id: eventData.email_id,
-    from_address: eventData.from,
-    to_addresses: eventData.to,
-    subject: eventData.subject,
-    email_created_at: eventData.created_at,
-    broadcast_id: eventData.broadcast_id ?? null,
-    template_id: eventData.template_id ?? null,
-    tags: eventData.tags ?? null,
-    // Bounce fields
-    bounce_type: eventData.bounce?.type ?? null,
-    bounce_sub_type: eventData.bounce?.subType ?? null,
-    bounce_message: eventData.bounce?.message ?? null,
-    bounce_diagnostic_code: eventData.bounce?.diagnosticCode ?? null,
-    // Click fields
-    click_ip_address: eventData.click?.ipAddress ?? null,
-    click_link: eventData.click?.link ?? null,
-    click_timestamp: eventData.click?.timestamp ?? null,
-    click_user_agent: eventData.click?.userAgent ?? null,
-  });
+  const { error } = await supabase.from('resend_wh_emails').upsert(
+    {
+      svix_id: svixId,
+      ...data,
+    },
+    { onConflict: 'svix_id', ignoreDuplicates: true },
+  );
 
   if (error) {
     throw new Error(`Failed to insert email event: ${error.message}`);
@@ -60,22 +51,17 @@ async function insertEmailEvent(
 async function insertContactEvent(
   supabase: SupabaseClient,
   event: ContactWebhookEvent,
+  svixId: string,
 ) {
-  const { data: eventData, type, created_at } = event;
+  const data = prepareContactEventData(event);
 
-  const { error } = await supabase.from('resend_wh_contacts').insert({
-    event_type: type,
-    event_created_at: created_at,
-    contact_id: eventData.id,
-    audience_id: eventData.audience_id,
-    segment_ids: eventData.segment_ids,
-    email: eventData.email,
-    first_name: eventData.first_name ?? null,
-    last_name: eventData.last_name ?? null,
-    unsubscribed: eventData.unsubscribed,
-    contact_created_at: eventData.created_at,
-    contact_updated_at: eventData.updated_at,
-  });
+  const { error } = await supabase.from('resend_wh_contacts').upsert(
+    {
+      svix_id: svixId,
+      ...data,
+    },
+    { onConflict: 'svix_id', ignoreDuplicates: true },
+  );
 
   if (error) {
     throw new Error(`Failed to insert contact event: ${error.message}`);
@@ -85,19 +71,17 @@ async function insertContactEvent(
 async function insertDomainEvent(
   supabase: SupabaseClient,
   event: DomainWebhookEvent,
+  svixId: string,
 ) {
-  const { data: eventData, type, created_at } = event;
+  const data = prepareDomainEventData(event);
 
-  const { error } = await supabase.from('resend_wh_domains').insert({
-    event_type: type,
-    event_created_at: created_at,
-    domain_id: eventData.id,
-    name: eventData.name,
-    status: eventData.status,
-    region: eventData.region,
-    domain_created_at: eventData.created_at,
-    records: eventData.records,
-  });
+  const { error } = await supabase.from('resend_wh_domains').upsert(
+    {
+      svix_id: svixId,
+      ...data,
+    },
+    { onConflict: 'svix_id', ignoreDuplicates: true },
+  );
 
   if (error) {
     throw new Error(`Failed to insert domain event: ${error.message}`);
@@ -115,7 +99,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Get required headers
   const svixId = request.headers.get('svix-id');
   const svixTimestamp = request.headers.get('svix-timestamp');
   const svixSignature = request.headers.get('svix-signature');
@@ -133,10 +116,7 @@ export async function POST(request: Request) {
     'svix-signature': svixSignature,
   };
 
-  // Get raw body for signature verification
   const rawBody = await request.text();
-
-  // Verify the webhook signature
   const result = verifyWebhook(rawBody, headers, secret);
 
   if (!result.success) {
@@ -153,13 +133,12 @@ export async function POST(request: Request) {
     const supabase = getSupabaseClient();
 
     if (isEmailEvent(event)) {
-      await insertEmailEvent(supabase, event);
+      await insertEmailEvent(supabase, event, svixId);
     } else if (isContactEvent(event)) {
-      await insertContactEvent(supabase, event);
+      await insertContactEvent(supabase, event, svixId);
     } else if (isDomainEvent(event)) {
-      await insertDomainEvent(supabase, event);
+      await insertDomainEvent(supabase, event, svixId);
     } else {
-      // TypeScript exhaustiveness check - this should never be reached
       const _exhaustiveCheck: never = event;
       console.warn('Unknown event type:', _exhaustiveCheck);
       return NextResponse.json(

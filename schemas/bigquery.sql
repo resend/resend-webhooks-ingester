@@ -5,6 +5,7 @@
 -- Email events table
 CREATE TABLE IF NOT EXISTS YOUR_DATASET.resend_wh_emails (
   id STRING NOT NULL,
+  svix_id STRING NOT NULL,
   event_type STRING NOT NULL,
   webhook_received_at TIMESTAMP NOT NULL,
   event_created_at TIMESTAMP NOT NULL,
@@ -31,6 +32,7 @@ CLUSTER BY event_type, email_id;
 -- Contact events table
 CREATE TABLE IF NOT EXISTS YOUR_DATASET.resend_wh_contacts (
   id STRING NOT NULL,
+  svix_id STRING NOT NULL,
   event_type STRING NOT NULL,
   webhook_received_at TIMESTAMP NOT NULL,
   event_created_at TIMESTAMP NOT NULL,
@@ -50,6 +52,7 @@ CLUSTER BY event_type, contact_id;
 -- Domain events table
 CREATE TABLE IF NOT EXISTS YOUR_DATASET.resend_wh_domains (
   id STRING NOT NULL,
+  svix_id STRING NOT NULL,
   event_type STRING NOT NULL,
   webhook_received_at TIMESTAMP NOT NULL,
   event_created_at TIMESTAMP NOT NULL,

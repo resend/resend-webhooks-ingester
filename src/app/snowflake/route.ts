@@ -73,19 +73,26 @@ function executeQuery(
 async function insertEmailEvent(
   connection: snowflake.Connection,
   event: EmailWebhookEvent,
+  svixId: string,
 ) {
   const data = prepareEmailEventData(event);
 
+  // Snowflake doesn't have INSERT IGNORE, so we use MERGE
   const sql = `
-    INSERT INTO resend_wh_emails (
-      event_type, event_created_at, email_id, from_address, to_addresses,
+    MERGE INTO resend_wh_emails t
+    USING (SELECT ? AS svix_id) s
+    ON t.svix_id = s.svix_id
+    WHEN NOT MATCHED THEN INSERT (
+      svix_id, event_type, event_created_at, email_id, from_address, to_addresses,
       subject, email_created_at, broadcast_id, template_id, tags,
       bounce_type, bounce_sub_type, bounce_message, bounce_diagnostic_code,
       click_ip_address, click_link, click_timestamp, click_user_agent
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   await executeQuery(connection, sql, [
+    svixId,
+    svixId,
     data.event_type,
     data.event_created_at,
     data.email_id,
@@ -110,17 +117,23 @@ async function insertEmailEvent(
 async function insertContactEvent(
   connection: snowflake.Connection,
   event: ContactWebhookEvent,
+  svixId: string,
 ) {
   const data = prepareContactEventData(event);
 
   const sql = `
-    INSERT INTO resend_wh_contacts (
-      event_type, event_created_at, contact_id, audience_id, segment_ids,
+    MERGE INTO resend_wh_contacts t
+    USING (SELECT ? AS svix_id) s
+    ON t.svix_id = s.svix_id
+    WHEN NOT MATCHED THEN INSERT (
+      svix_id, event_type, event_created_at, contact_id, audience_id, segment_ids,
       email, first_name, last_name, unsubscribed, contact_created_at, contact_updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   await executeQuery(connection, sql, [
+    svixId,
+    svixId,
     data.event_type,
     data.event_created_at,
     data.contact_id,
@@ -138,17 +151,23 @@ async function insertContactEvent(
 async function insertDomainEvent(
   connection: snowflake.Connection,
   event: DomainWebhookEvent,
+  svixId: string,
 ) {
   const data = prepareDomainEventData(event);
 
   const sql = `
-    INSERT INTO resend_wh_domains (
-      event_type, event_created_at, domain_id, name, status,
+    MERGE INTO resend_wh_domains t
+    USING (SELECT ? AS svix_id) s
+    ON t.svix_id = s.svix_id
+    WHEN NOT MATCHED THEN INSERT (
+      svix_id, event_type, event_created_at, domain_id, name, status,
       region, domain_created_at, records
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   await executeQuery(connection, sql, [
+    svixId,
+    svixId,
     data.event_type,
     data.event_created_at,
     data.domain_id,

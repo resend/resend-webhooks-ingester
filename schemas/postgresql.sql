@@ -4,6 +4,7 @@
 -- Email events table
 CREATE TABLE IF NOT EXISTS resend_wh_emails (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  svix_id TEXT NOT NULL UNIQUE,
   event_type TEXT NOT NULL,
   webhook_received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   event_created_at TIMESTAMPTZ NOT NULL,
@@ -33,6 +34,7 @@ CREATE INDEX IF NOT EXISTS idx_resend_wh_emails_from_address ON resend_wh_emails
 -- Contact events table
 CREATE TABLE IF NOT EXISTS resend_wh_contacts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  svix_id TEXT NOT NULL UNIQUE,
   event_type TEXT NOT NULL,
   webhook_received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   event_created_at TIMESTAMPTZ NOT NULL,
@@ -56,6 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_resend_wh_contacts_email ON resend_wh_contacts(em
 -- Domain events table
 CREATE TABLE IF NOT EXISTS resend_wh_domains (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  svix_id TEXT NOT NULL UNIQUE,
   event_type TEXT NOT NULL,
   webhook_received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   event_created_at TIMESTAMPTZ NOT NULL,

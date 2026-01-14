@@ -4,6 +4,7 @@
 -- Email events table
 CREATE TABLE IF NOT EXISTS resend_wh_emails (
   id UUID DEFAULT generateUUIDv4(),
+  svix_id String,
   event_type String,
   webhook_received_at DateTime64(3) DEFAULT now64(3),
   event_created_at DateTime64(3),
@@ -24,13 +25,14 @@ CREATE TABLE IF NOT EXISTS resend_wh_emails (
   click_timestamp String DEFAULT '',
   click_user_agent String DEFAULT ''
 )
-ENGINE = MergeTree()
-ORDER BY (event_type, webhook_received_at, email_id)
+ENGINE = ReplacingMergeTree()
+ORDER BY (svix_id)
 PARTITION BY toYYYYMM(webhook_received_at);
 
 -- Contact events table
 CREATE TABLE IF NOT EXISTS resend_wh_contacts (
   id UUID DEFAULT generateUUIDv4(),
+  svix_id String,
   event_type String,
   webhook_received_at DateTime64(3) DEFAULT now64(3),
   event_created_at DateTime64(3),
@@ -44,13 +46,14 @@ CREATE TABLE IF NOT EXISTS resend_wh_contacts (
   contact_created_at DateTime64(3),
   contact_updated_at DateTime64(3)
 )
-ENGINE = MergeTree()
-ORDER BY (event_type, webhook_received_at, contact_id)
+ENGINE = ReplacingMergeTree()
+ORDER BY (svix_id)
 PARTITION BY toYYYYMM(webhook_received_at);
 
 -- Domain events table
 CREATE TABLE IF NOT EXISTS resend_wh_domains (
   id UUID DEFAULT generateUUIDv4(),
+  svix_id String,
   event_type String,
   webhook_received_at DateTime64(3) DEFAULT now64(3),
   event_created_at DateTime64(3),
@@ -61,6 +64,6 @@ CREATE TABLE IF NOT EXISTS resend_wh_domains (
   domain_created_at DateTime64(3),
   records String DEFAULT ''
 )
-ENGINE = MergeTree()
-ORDER BY (event_type, webhook_received_at, domain_id)
+ENGINE = ReplacingMergeTree()
+ORDER BY (svix_id)
 PARTITION BY toYYYYMM(webhook_received_at);

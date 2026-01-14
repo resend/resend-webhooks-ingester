@@ -4,6 +4,7 @@
 -- Email events table
 CREATE TABLE IF NOT EXISTS resend_wh_emails (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  svix_id VARCHAR(255) NOT NULL UNIQUE,
   event_type VARCHAR(50) NOT NULL,
   webhook_received_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   event_created_at TIMESTAMP(6) NOT NULL,
@@ -32,6 +33,7 @@ CREATE TABLE IF NOT EXISTS resend_wh_emails (
 -- Contact events table
 CREATE TABLE IF NOT EXISTS resend_wh_contacts (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  svix_id VARCHAR(255) NOT NULL UNIQUE,
   event_type VARCHAR(50) NOT NULL,
   webhook_received_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   event_created_at TIMESTAMP(6) NOT NULL,
@@ -54,6 +56,7 @@ CREATE TABLE IF NOT EXISTS resend_wh_contacts (
 -- Domain events table
 CREATE TABLE IF NOT EXISTS resend_wh_domains (
   id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  svix_id VARCHAR(255) NOT NULL UNIQUE,
   event_type VARCHAR(50) NOT NULL,
   webhook_received_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   event_created_at TIMESTAMP(6) NOT NULL,

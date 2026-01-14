@@ -14,14 +14,17 @@ export interface WebhookHandlers<TClient> {
   insertEmailEvent: (
     client: TClient,
     event: EmailWebhookEvent,
+    svixId: string,
   ) => Promise<void>;
   insertContactEvent: (
     client: TClient,
     event: ContactWebhookEvent,
+    svixId: string,
   ) => Promise<void>;
   insertDomainEvent: (
     client: TClient,
     event: DomainWebhookEvent,
+    svixId: string,
   ) => Promise<void>;
   cleanup?: (client: TClient) => Promise<void>;
 }
@@ -75,11 +78,11 @@ export function createWebhookHandler<TClient>(
       client = await handlers.getClient();
 
       if (isEmailEvent(event)) {
-        await handlers.insertEmailEvent(client, event);
+        await handlers.insertEmailEvent(client, event, svixId);
       } else if (isContactEvent(event)) {
-        await handlers.insertContactEvent(client, event);
+        await handlers.insertContactEvent(client, event, svixId);
       } else if (isDomainEvent(event)) {
-        await handlers.insertDomainEvent(client, event);
+        await handlers.insertDomainEvent(client, event, svixId);
       } else {
         const _exhaustiveCheck: never = event;
         console.warn('Unknown event type:', _exhaustiveCheck);

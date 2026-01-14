@@ -34,13 +34,16 @@ type ClickHouseClient = ReturnType<typeof getClient>;
 async function insertEmailEvent(
   client: ClickHouseClient,
   event: EmailWebhookEvent,
+  svixId: string,
 ) {
   const data = prepareEmailEventData(event);
 
+  // ClickHouse ReplacingMergeTree handles deduplication by svix_id
   await client.insert({
     table: 'resend_wh_emails',
     values: [
       {
+        svix_id: svixId,
         event_type: data.event_type,
         event_created_at: data.event_created_at,
         webhook_received_at: new Date().toISOString(),
@@ -69,6 +72,7 @@ async function insertEmailEvent(
 async function insertContactEvent(
   client: ClickHouseClient,
   event: ContactWebhookEvent,
+  svixId: string,
 ) {
   const data = prepareContactEventData(event);
 
@@ -76,6 +80,7 @@ async function insertContactEvent(
     table: 'resend_wh_contacts',
     values: [
       {
+        svix_id: svixId,
         event_type: data.event_type,
         event_created_at: data.event_created_at,
         webhook_received_at: new Date().toISOString(),
@@ -97,6 +102,7 @@ async function insertContactEvent(
 async function insertDomainEvent(
   client: ClickHouseClient,
   event: DomainWebhookEvent,
+  svixId: string,
 ) {
   const data = prepareDomainEventData(event);
 
@@ -104,6 +110,7 @@ async function insertDomainEvent(
     table: 'resend_wh_domains',
     values: [
       {
+        svix_id: svixId,
         event_type: data.event_type,
         event_created_at: data.event_created_at,
         webhook_received_at: new Date().toISOString(),
