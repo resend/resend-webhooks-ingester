@@ -8,7 +8,19 @@ A self-hosted webhook ingester for [Resend](https://resend.com) that stores emai
 - Stores all webhook events in your database (append-only log)
 - Supports all Resend event types: emails, contacts, and domains
 - Type-safe with full TypeScript support
-- Currently supports Supabase (more database connectors coming soon)
+- Multiple database connectors available
+
+## Supported Databases
+
+| Connector | Endpoint | Best For |
+|-----------|----------|----------|
+| [Supabase](#supabase) | `/supabase` | Quick setup with managed Postgres |
+| [PostgreSQL](#postgresql) | `/postgresql` | Self-hosted or managed Postgres (Neon, Railway, Render) |
+| [MySQL](#mysql) | `/mysql` | Self-hosted or managed MySQL |
+| [PlanetScale](#planetscale) | `/planetscale` | Serverless MySQL |
+| [Snowflake](#snowflake) | `/snowflake` | Data warehousing and analytics |
+| [BigQuery](#bigquery) | `/bigquery` | Google Cloud analytics |
+| [ClickHouse](#clickhouse) | `/clickhouse` | High-performance analytics |
 
 ## Supported Event Types
 
@@ -41,13 +53,7 @@ A self-hosted webhook ingester for [Resend](https://resend.com) that stores emai
 | `domain.updated` | Domain configuration updated |
 | `domain.deleted` | Domain removed from Resend |
 
-## Prerequisites
-
-- pnpm (recommended)
-- A [Resend](https://resend.com) account
-- A Database
-
-## Installation
+## Quick Start
 
 ### 1. Clone the repository
 
@@ -64,81 +70,130 @@ pnpm install
 
 ### 3. Set up environment variables
 
-Copy the example environment file:
-
 ```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your credentials:
+Edit `.env.local` with your Resend webhook secret and database credentials (see [Database Setup](#database-setup)).
 
-```env
-# Resend Webhook Secret
-# Get this from your Resend Dashboard when creating a webhook
-RESEND_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxx
+### 4. Create database tables
 
-# Supabase Configuration
-# Get these from your Supabase project settings (Settings > API)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+Run the appropriate schema file for your database from the `schemas/` directory.
+
+### 5. Deploy and configure webhook
+
+Deploy to Vercel (or your preferred platform) and configure your webhook endpoint in the [Resend Dashboard](https://resend.com/webhooks).
 
 ## Database Setup
 
 ### Supabase
 
-1. Go to your Supabase project dashboard
-2. Navigate to **SQL Editor**
-3. Copy the contents of `schema.sql` and run it
+**Environment Variables:**
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
 
-This creates three tables:
-- `resend_wh_emails` - Stores all email events
-- `resend_wh_contacts` - Stores all contact events
-- `resend_wh_domains` - Stores all domain events
+**Schema:** Run `schemas/supabase.sql` in the Supabase SQL Editor.
 
-Each table includes appropriate indexes for common queries.
+**Endpoint:** `POST /supabase`
 
-#### Database Schema Overview
+---
 
-**resend_wh_emails**
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Auto-generated primary key |
-| `event_type` | TEXT | The webhook event type |
-| `webhook_received_at` | TIMESTAMPTZ | When the webhook was received |
-| `event_created_at` | TIMESTAMPTZ | When the event occurred in Resend |
-| `email_id` | TEXT | Resend's email ID |
-| `from_address` | TEXT | Sender email address |
-| `to_addresses` | TEXT[] | Recipient email addresses |
-| `subject` | TEXT | Email subject line |
-| `broadcast_id` | TEXT | Broadcast campaign ID (if applicable) |
-| `template_id` | TEXT | Template ID (if applicable) |
-| `tags` | JSONB | Custom tags attached to the email |
-| `bounce_*` | Various | Bounce details (for bounced events) |
-| `click_*` | Various | Click details (for clicked events) |
+### PostgreSQL
 
-**resend_wh_contacts**
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Auto-generated primary key |
-| `event_type` | TEXT | The webhook event type |
-| `contact_id` | TEXT | Resend's contact ID |
-| `audience_id` | TEXT | The audience this contact belongs to |
-| `email` | TEXT | Contact's email address |
-| `first_name` | TEXT | Contact's first name |
-| `last_name` | TEXT | Contact's last name |
-| `unsubscribed` | BOOLEAN | Subscription status |
+Works with any PostgreSQL database: self-hosted, Neon, Railway, Render, etc.
 
-**resend_wh_domains**
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | UUID | Auto-generated primary key |
-| `event_type` | TEXT | The webhook event type |
-| `domain_id` | TEXT | Resend's domain ID |
-| `name` | TEXT | Domain name |
-| `status` | TEXT | Verification status |
-| `region` | TEXT | AWS region |
-| `records` | JSONB | DNS records for verification |
+**Environment Variables:**
+```env
+POSTGRESQL_URL=postgresql://user:password@host:5432/database
+```
+
+**Schema:** Run `schemas/postgresql.sql` in your database.
+
+**Endpoint:** `POST /postgresql`
+
+---
+
+### MySQL
+
+**Environment Variables:**
+```env
+MYSQL_URL=mysql://user:password@host:3306/database
+```
+
+**Schema:** Run `schemas/mysql.sql` in your database.
+
+**Endpoint:** `POST /mysql`
+
+---
+
+### PlanetScale
+
+**Environment Variables:**
+```env
+PLANETSCALE_URL=mysql://username:password@host/database?ssl={"rejectUnauthorized":true}
+```
+
+Get your connection string from the PlanetScale dashboard under **Connect > Create password**.
+
+**Schema:** Run `schemas/mysql.sql` in your PlanetScale database (uses MySQL syntax).
+
+**Endpoint:** `POST /planetscale`
+
+---
+
+### Snowflake
+
+**Environment Variables:**
+```env
+SNOWFLAKE_ACCOUNT=your-account-identifier
+SNOWFLAKE_USERNAME=your-username
+SNOWFLAKE_PASSWORD=your-password
+SNOWFLAKE_DATABASE=your-database
+SNOWFLAKE_SCHEMA=your-schema
+SNOWFLAKE_WAREHOUSE=your-warehouse
+```
+
+**Schema:** Run `schemas/snowflake.sql` in a Snowflake worksheet.
+
+**Endpoint:** `POST /snowflake`
+
+---
+
+### BigQuery
+
+**Environment Variables:**
+```env
+BIGQUERY_PROJECT_ID=your-project-id
+BIGQUERY_DATASET_ID=your-dataset-id
+# Optional: Service account credentials as JSON string
+BIGQUERY_CREDENTIALS={"type":"service_account","project_id":"..."}
+```
+
+If running on Google Cloud (Cloud Run, GKE), you can omit `BIGQUERY_CREDENTIALS` and use default application credentials.
+
+**Schema:** Run `schemas/bigquery.sql` in the BigQuery console (replace `YOUR_DATASET` with your dataset ID).
+
+**Endpoint:** `POST /bigquery`
+
+---
+
+### ClickHouse
+
+**Environment Variables:**
+```env
+CLICKHOUSE_URL=https://your-instance.clickhouse.cloud:8443
+CLICKHOUSE_USERNAME=default
+CLICKHOUSE_PASSWORD=your-password
+CLICKHOUSE_DATABASE=default
+```
+
+**Schema:** Run `schemas/clickhouse.sql` in your ClickHouse client.
+
+**Endpoint:** `POST /clickhouse`
+
+---
 
 ## Running Locally
 
@@ -148,15 +203,15 @@ Start the development server:
 pnpm dev
 ```
 
-The webhook endpoint will be available at `http://localhost:3000/[connector]`.
+The webhook endpoints will be available at `http://localhost:3000/{connector}`.
 
-For local testing, you'll need to expose your local server to the internet using a tool like [ngrok](https://ngrok.com):
+For local testing, expose your server using [ngrok](https://ngrok.com):
 
 ```bash
 ngrok http 3000
 ```
 
-Then use the ngrok URL (e.g., `https://abc123.ngrok.io/[connector]`) as your webhook endpoint in Resend.
+Use the ngrok URL (e.g., `https://abc123.ngrok.io/supabase`) as your webhook endpoint in Resend.
 
 ## Deployment
 
@@ -164,51 +219,70 @@ Then use the ngrok URL (e.g., `https://abc123.ngrok.io/[connector]`) as your web
 
 1. Push your code to GitHub
 2. Import the repository in [Vercel](https://vercel.com)
-3. Add environment variables in Vercel's project settings:
-   - `RESEND_WEBHOOK_SECRET`
-   - `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (or other required variables)
+3. Add environment variables:
+   - `RESEND_WEBHOOK_SECRET` (required)
+   - Database-specific variables for your chosen connector
 4. Deploy
 
-Your webhook endpoint will be: `https://your-project.vercel.app/[connector]`
+Your webhook endpoint: `https://your-project.vercel.app/{connector}`
 
 ### Other Platforms
 
-This is a standard Next.js application and can be deployed to any platform that supports Node.js:
+This is a standard Next.js application:
 
 - **Netlify**: Use the Next.js runtime
 - **Railway**: Deploy directly from GitHub
 - **Fly.io**: Use the Node.js buildpack
-- **Self-hosted**: Run `pnpm build && pnpm start`
+- **Google Cloud Run**: Build and deploy container
+- **Self-hosted**: `pnpm build && pnpm start`
 
 ## Configuring Resend Webhooks
 
 1. Go to your [Resend Dashboard](https://resend.com/webhooks)
 2. Click **Add Webhook**
-3. Enter your webhook endpoint URL:
-   - Local: `https://your-ngrok-url.ngrok.io/[connector]`
-   - Production: `https://your-domain.com/[connector]`
+3. Enter your webhook endpoint URL (e.g., `https://your-domain.com/supabase`)
 4. Select the events you want to receive
 5. Click **Create**
-6. Copy the **Signing Secret** and add it to your environment variables as `RESEND_WEBHOOK_SECRET`
+6. Copy the **Signing Secret** and add it as `RESEND_WEBHOOK_SECRET`
 
-## How It Works
+## Project Structure
 
-1. Resend sends a POST request to your webhook endpoint when an event occurs
-2. The request includes three Svix headers for verification:
-   - `svix-id`: Unique message identifier
-   - `svix-timestamp`: When the webhook was sent
-   - `svix-signature`: Cryptographic signature
-3. The ingester verifies the signature using your webhook secret
-4. If valid, the event data is inserted into the appropriate database table
-5. Returns `200 OK` on success, or `5xx` on failure (triggers Resend retry)
+```
+src/
+├── app/
+│   ├── page.tsx              # Empty root page
+│   ├── supabase/route.ts     # Supabase connector
+│   ├── postgresql/route.ts   # PostgreSQL connector
+│   ├── mysql/route.ts        # MySQL connector
+│   ├── planetscale/route.ts  # PlanetScale connector
+│   ├── snowflake/route.ts    # Snowflake connector
+│   ├── bigquery/route.ts     # BigQuery connector
+│   └── clickhouse/route.ts   # ClickHouse connector
+├── lib/
+│   ├── verify-webhook.ts     # Svix signature verification
+│   └── webhook-handler.ts    # Shared webhook handling logic
+├── types/
+│   └── webhook.ts            # TypeScript types for webhook payloads
+└── env.d.ts                  # Environment variable types
 
-## Connector Endpoint Reference
+schemas/
+├── supabase.sql              # Supabase/PostgreSQL schema
+├── postgresql.sql            # PostgreSQL schema
+├── mysql.sql                 # MySQL/PlanetScale schema
+├── snowflake.sql             # Snowflake schema
+├── bigquery.sql              # BigQuery schema
+└── clickhouse.sql            # ClickHouse schema
+```
 
-### `POST /supabase`
+## API Reference
 
-Receives Resend webhooks and stores them in Supabase.
+All connectors share the same API:
 
-**Headers Required:**
+### `POST /{connector}`
+
+Receives and stores Resend webhook events.
+
+**Required Headers:**
 - `svix-id`: Webhook message ID
 - `svix-timestamp`: Unix timestamp
 - `svix-signature`: HMAC signature
@@ -219,39 +293,21 @@ Receives Resend webhooks and stores them in Supabase.
 | `200` | Webhook processed successfully |
 | `400` | Missing headers or unknown event type |
 | `401` | Invalid webhook signature |
-| `500` | Server error (will trigger Resend retry) |
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── page.tsx              # Empty root page
-│   └── supabase/
-│       └── route.ts          # Supabase webhook endpoint
-├── lib/
-│   └── verify-webhook.ts     # Svix signature verification
-├── types/
-│   └── webhook.ts            # TypeScript types for webhook payloads
-└── env.d.ts                  # Environment variable types
-
-schema.sql                    # Database schema for Supabase
-.env.example                  # Example environment variables
-```
+| `500` | Server error (triggers Resend retry) |
 
 ## Security Considerations
 
 - **Always verify webhook signatures** - The ingester rejects requests with invalid signatures
 - **Use environment variables** - Never commit secrets to your repository
-- **Use service role keys carefully** - The Supabase service role key bypasses RLS; only use it server-side
-- **HTTPS only** - Always use HTTPS in production for webhook endpoints
+- **Use service role keys carefully** - Keys that bypass RLS should only be used server-side
+- **HTTPS only** - Always use HTTPS in production
 
 ## Troubleshooting
 
 ### Webhooks not being received
 - Verify your endpoint URL is correct in Resend
 - Check that your server is publicly accessible
-- Ensure the `RESEND_WEBHOOK_SECRET` matches the signing secret in Resend
+- Ensure `RESEND_WEBHOOK_SECRET` matches the signing secret in Resend
 
 ### Signature verification failing
 - Make sure you're using the raw request body for verification
@@ -259,16 +315,25 @@ schema.sql                    # Database schema for Supabase
 - Verify the webhook secret hasn't been rotated in Resend
 
 ### Database insertion errors
-- Verify your Supabase credentials are correct
-- Check that the database schema has been applied
-- Review the server logs for specific error messages
+- Verify your database credentials are correct
+- Check that the schema has been applied
+- Review server logs for specific error messages
+
+### Snowflake connection issues
+- Verify your account identifier format (e.g., `xy12345.us-east-1`)
+- Ensure the warehouse is running and accessible
+- Check that the user has INSERT permissions on the tables
+
+### BigQuery errors
+- Verify the service account has BigQuery Data Editor role
+- Ensure the dataset and tables exist
+- Check that the project ID is correct
 
 ## Resources
 
 - [Resend Webhooks Documentation](https://resend.com/docs/webhooks/introduction)
 - [Resend Event Types](https://resend.com/docs/webhooks/event-types)
 - [Verifying Webhook Signatures](https://resend.com/docs/webhooks/verify-webhooks-requests)
-- [Supabase Documentation](https://supabase.com/docs)
 
 ## License
 

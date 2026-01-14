@@ -1,0 +1,125 @@
+import { BigQuery } from '@google-cloud/bigquery';
+import {
+  createWebhookHandler,
+  prepareContactEventData,
+  prepareDomainEventData,
+  prepareEmailEventData,
+} from '@/lib/webhook-handler';
+import type {
+  ContactWebhookEvent,
+  DomainWebhookEvent,
+  EmailWebhookEvent,
+} from '@/types/webhook';
+
+function getClient() {
+  const projectId = process.env.BIGQUERY_PROJECT_ID;
+  const datasetId = process.env.BIGQUERY_DATASET_ID;
+  const credentials = process.env.BIGQUERY_CREDENTIALS;
+
+  if (!projectId || !datasetId) {
+    throw new Error('Missing BIGQUERY_PROJECT_ID or BIGQUERY_DATASET_ID');
+  }
+
+  const options: { projectId: string; credentials?: object } = { projectId };
+
+  if (credentials) {
+    options.credentials = JSON.parse(credentials);
+  }
+
+  const bigquery = new BigQuery(options);
+  return { bigquery, datasetId };
+}
+
+type BigQueryClient = ReturnType<typeof getClient>;
+
+async function insertEmailEvent(
+  client: BigQueryClient,
+  event: EmailWebhookEvent,
+) {
+  const data = prepareEmailEventData(event);
+
+  const row = {
+    event_type: data.event_type,
+    event_created_at: data.event_created_at,
+    webhook_received_at: new Date().toISOString(),
+    email_id: data.email_id,
+    from_address: data.from_address,
+    to_addresses: data.to_addresses,
+    subject: data.subject,
+    email_created_at: data.email_created_at,
+    broadcast_id: data.broadcast_id,
+    template_id: data.template_id,
+    tags: data.tags ? JSON.stringify(data.tags) : null,
+    bounce_type: data.bounce_type,
+    bounce_sub_type: data.bounce_sub_type,
+    bounce_message: data.bounce_message,
+    bounce_diagnostic_code: data.bounce_diagnostic_code,
+    click_ip_address: data.click_ip_address,
+    click_link: data.click_link,
+    click_timestamp: data.click_timestamp,
+    click_user_agent: data.click_user_agent,
+  };
+
+  await client.bigquery
+    .dataset(client.datasetId)
+    .table('resend_wh_emails')
+    .insert([row]);
+}
+
+async function insertContactEvent(
+  client: BigQueryClient,
+  event: ContactWebhookEvent,
+) {
+  const data = prepareContactEventData(event);
+
+  const row = {
+    event_type: data.event_type,
+    event_created_at: data.event_created_at,
+    webhook_received_at: new Date().toISOString(),
+    contact_id: data.contact_id,
+    audience_id: data.audience_id,
+    segment_ids: data.segment_ids,
+    email: data.email,
+    first_name: data.first_name,
+    last_name: data.last_name,
+    unsubscribed: data.unsubscribed,
+    contact_created_at: data.contact_created_at,
+    contact_updated_at: data.contact_updated_at,
+  };
+
+  await client.bigquery
+    .dataset(client.datasetId)
+    .table('resend_wh_contacts')
+    .insert([row]);
+}
+
+async function insertDomainEvent(
+  client: BigQueryClient,
+  event: DomainWebhookEvent,
+) {
+  const data = prepareDomainEventData(event);
+
+  const row = {
+    event_type: data.event_type,
+    event_created_at: data.event_created_at,
+    webhook_received_at: new Date().toISOString(),
+    domain_id: data.domain_id,
+    name: data.name,
+    status: data.status,
+    region: data.region,
+    domain_created_at: data.domain_created_at,
+    records: data.records ? JSON.stringify(data.records) : null,
+  };
+
+  await client.bigquery
+    .dataset(client.datasetId)
+    .table('resend_wh_domains')
+    .insert([row]);
+}
+
+export const POST = createWebhookHandler({
+  getClient,
+  insertEmailEvent,
+  insertContactEvent,
+  insertDomainEvent,
+});
