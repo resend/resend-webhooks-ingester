@@ -1,37 +1,108 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": true,
-    "includes": ["**", "!node_modules", "!.next", "!dist", "!build"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noUnknownAtRules": "off"
-      }
-    },
-    "domains": {
-      "next": "recommended",
-      "react": "recommended"
-    }
-  },
+  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
   "assist": {
     "actions": {
       "source": {
         "organizeImports": "on"
       }
     }
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noAutofocus": "off",
+        "noLabelWithoutControl": "off",
+        "noPositiveTabindex": "off",
+        "noStaticElementInteractions": "off",
+        "noSvgWithoutTitle": "off",
+        "useAriaPropsForRole": "off",
+        "useButtonType": "off",
+        "useFocusableInteractive": "off",
+        "useIframeTitle": "off",
+        "useKeyWithClickEvents": "off",
+        "useSemanticElements": "off",
+        "useAriaPropsSupportedByRole": "off",
+        "useValidAnchor": "off"
+      },
+      "correctness": {
+        "useUniqueElementIds": "off",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "off",
+        "useHookAtTopLevel": "off"
+      },
+      "complexity": {
+        "noImportantStyles": "off",
+        "noUselessSwitchCase": "off",
+        "noBannedTypes": "off",
+        "noUselessFragments": "off"
+      },
+      "suspicious": {
+        "noUnknownAtRules": "off",
+        "noImplicitAnyLet": "off",
+        "noExplicitAny": "off",
+        "noAssignInExpressions": "off",
+        "noArrayIndexKey": "off",
+        "noFallthroughSwitchClause": "off",
+        "noPrototypeBuiltins": "off",
+        "useDefaultSwitchClauseLast": "off",
+        "noCommentText": "off",
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["error", "warn", "info"]
+          }
+        }
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off",
+        "noBlankTarget": "off"
+      },
+      "style": {
+        "useBlockStatements": "error",
+        "noNonNullAssertion": "off",
+        "useSingleVarDeclarator": "off",
+        "noParameterAssign": "off",
+        "noDescendingSpecificity": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off",
+        "noImgElement": "off",
+        "noDynamicNamespaceImportAccess": "off"
+      }
+    }
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/dist",
+      "!**/pnpm-lock.yaml",
+      "!**/infra/logs-migrations/**/*",
+      "!**/infra/migrations/**/*",
+      "!**/.next",
+      "!**/public",
+      "!**/transactional/.react-email/**/*",
+      "!**/transactional/node_modules/**/*",
+      "!**/playwright-report",
+      "!src/app/(internal)/design/_common/*.json"
+    ]
   }
 }
