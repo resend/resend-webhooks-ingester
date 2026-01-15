@@ -19,6 +19,7 @@ A self-hosted webhook ingester for [Resend](https://resend.com) that stores emai
 | [PostgreSQL](#postgresql) | `/postgresql` | Self-hosted or managed Postgres (Neon, Railway, Render) |
 | [MySQL](#mysql) | `/mysql` | Self-hosted or managed MySQL |
 | [PlanetScale](#planetscale) | `/planetscale` | Serverless MySQL |
+| [MongoDB](#mongodb) | `/mongodb` | Document database (Atlas, self-hosted) |
 | [Snowflake](#snowflake) | `/snowflake` | Data warehousing and analytics |
 | [BigQuery](#bigquery) | `/bigquery` | Google Cloud analytics |
 | [ClickHouse](#clickhouse) | `/clickhouse` | High-performance analytics |
@@ -144,6 +145,29 @@ Get your connection string from the PlanetScale dashboard under **Connect > Crea
 
 ---
 
+### MongoDB
+
+Works with MongoDB Atlas, self-hosted MongoDB, or any MongoDB-compatible database.
+
+**Environment Variables:**
+```env
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority
+MONGODB_DATABASE=resend_webhooks
+```
+
+Get your connection string from your MongoDB Atlas dashboard or construct it for your self-hosted instance.
+
+**Schema:** Run `schemas/mongodb.js` using mongosh:
+```bash
+mongosh "your-connection-string" schemas/mongodb.js
+```
+
+Or execute the commands manually in MongoDB Compass or Atlas.
+
+**Endpoint:** `POST /mongodb`
+
+---
+
 ### Snowflake
 
 **Environment Variables:**
@@ -256,6 +280,7 @@ src/
 │   ├── postgresql/route.ts   # PostgreSQL connector
 │   ├── mysql/route.ts        # MySQL connector
 │   ├── planetscale/route.ts  # PlanetScale connector
+│   ├── mongodb/route.ts      # MongoDB connector
 │   ├── snowflake/route.ts    # Snowflake connector
 │   ├── bigquery/route.ts     # BigQuery connector
 │   └── clickhouse/route.ts   # ClickHouse connector
@@ -270,6 +295,7 @@ schemas/
 ├── supabase.sql              # Supabase/PostgreSQL schema
 ├── postgresql.sql            # PostgreSQL schema
 ├── mysql.sql                 # MySQL/PlanetScale schema
+├── mongodb.js                # MongoDB schema and indexes
 ├── snowflake.sql             # Snowflake schema
 ├── bigquery.sql              # BigQuery schema
 └── clickhouse.sql            # ClickHouse schema
@@ -372,6 +398,27 @@ WHERE event_created_at < now() - INTERVAL 90 DAY;
 ```
 
 Alternatively, use [TTL expressions](https://clickhouse.com/docs/en/engines/table-engines/mergetree-family/mergetree#table_engine-mergetree-ttl) in your table definition for automatic cleanup.
+
+### MongoDB
+
+```javascript
+// Delete email events older than 90 days
+db.resend_wh_emails.deleteMany({
+  event_created_at: { $lt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) }
+});
+
+// Delete contact events older than 90 days
+db.resend_wh_contacts.deleteMany({
+  event_created_at: { $lt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) }
+});
+
+// Delete domain events older than 90 days
+db.resend_wh_domains.deleteMany({
+  event_created_at: { $lt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) }
+});
+```
+
+You can also use [MongoDB Atlas scheduled triggers](https://www.mongodb.com/docs/atlas/app-services/triggers/scheduled-triggers/) or create a TTL index for automatic expiration.
 
 ## Example Queries
 

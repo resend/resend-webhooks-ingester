@@ -34,5 +34,9 @@ declare namespace NodeJS {
     CLICKHOUSE_USERNAME?: string;
     CLICKHOUSE_PASSWORD?: string;
     CLICKHOUSE_DATABASE?: string;
+
+    // MongoDB
+    MONGODB_URI?: string;
+    MONGODB_DATABASE?: string;
   }
 }

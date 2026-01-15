@@ -69,6 +69,31 @@ ORDER BY day DESC, event_type;
 
 > **Note:** The `FINAL` keyword ensures proper deduplication when using ReplacingMergeTree.
 
+### MongoDB
+
+```javascript
+db.resend_wh_emails.aggregate([
+  {
+    $group: {
+      _id: {
+        day: { $dateToString: { format: "%Y-%m-%d", date: "$event_created_at" } },
+        event_type: "$event_type"
+      },
+      count: { $sum: 1 }
+    }
+  },
+  { $sort: { "_id.day": -1, "_id.event_type": 1 } },
+  {
+    $project: {
+      _id: 0,
+      day: "$_id.day",
+      event_type: "$_id.event_type",
+      count: 1
+    }
+  }
+]);
+```
+
 ## Additional Useful Queries
 
 ### Bounce Rate by Day (PostgreSQL/Supabase)
