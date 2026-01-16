@@ -1,0 +1,65 @@
+services:
+  - type: web
+    runtime: docker
+    name: resend-webhooks-ingester
+    healthCheckPath: /
+    envVars:
+      - key: RESEND_WEBHOOK_SECRET
+        sync: false
+      # Uncomment the database you want to use:
+      #
+      # MongoDB
+      # - key: MONGODB_URI
+      #   sync: false
+      # - key: MONGODB_DATABASE
+      #   sync: false
+      #
+      # PostgreSQL
+      # - key: POSTGRESQL_URL
+      #   sync: false
+      #
+      # MySQL
+      # - key: MYSQL_URL
+      #   sync: false
+      #
+      # PlanetScale
+      # - key: PLANETSCALE_URL
+      #   sync: false
+      #
+      # Supabase
+      # - key: SUPABASE_URL
+      #   sync: false
+      # - key: SUPABASE_SERVICE_ROLE_KEY
+      #   sync: false
+      #
+      # ClickHouse
+      # - key: CLICKHOUSE_URL
+      #   sync: false
+      # - key: CLICKHOUSE_USERNAME
+      #   sync: false
+      # - key: CLICKHOUSE_PASSWORD
+      #   sync: false
+      # - key: CLICKHOUSE_DATABASE
+      #   sync: false
+      #
+      # Snowflake
+      # - key: SNOWFLAKE_ACCOUNT
+      #   sync: false
+      # - key: SNOWFLAKE_USERNAME
+      #   sync: false
+      # - key: SNOWFLAKE_PASSWORD
+      #   sync: false
+      # - key: SNOWFLAKE_DATABASE
+      #   sync: false
+      # - key: SNOWFLAKE_SCHEMA
+      #   sync: false
+      # - key: SNOWFLAKE_WAREHOUSE
+      #   sync: false
+      #
+      # BigQuery
+      # - key: BIGQUERY_PROJECT_ID
+      #   sync: false
+      # - key: BIGQUERY_DATASET_ID
+      #   sync: false
+      # - key: BIGQUERY_CREDENTIALS
+      #   sync: false

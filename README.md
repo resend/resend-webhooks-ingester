@@ -283,7 +283,38 @@ Tests use `.env.test` for configuration. The `dev:test` script loads this file a
 
 ## Deployment
 
-### Vercel (Recommended)
+### One-Click Deploy
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/resend/resend-webhooks-ingester)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/resend/resend-webhooks-ingester)
+
+### Docker
+
+Pull the image from GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/resend/resend-webhooks-ingester:latest
+```
+
+Run with environment variables:
+
+```bash
+docker run -p 3000:3000 \
+  -e RESEND_WEBHOOK_SECRET=whsec_your_secret \
+  -e MONGODB_URI=mongodb://host:27017 \
+  -e MONGODB_DATABASE=resend_webhooks \
+  ghcr.io/resend/resend-webhooks-ingester:latest
+```
+
+Or build locally:
+
+```bash
+docker build -t resend-webhooks-ingester .
+docker run -p 3000:3000 -e ... resend-webhooks-ingester
+```
+
+### Vercel
 
 1. Push your code to GitHub
 2. Import the repository in [Vercel](https://vercel.com)
@@ -299,10 +330,11 @@ Your webhook endpoint: `https://your-project.vercel.app/{connector}`
 This is a standard Next.js application:
 
 - **Netlify**: Use the Next.js runtime
-- **Railway**: Deploy directly from GitHub
-- **Fly.io**: Use the Node.js buildpack
+- **Railway**: Deploy directly from GitHub or use the deploy button above
+- **Render**: Use the deploy button above or connect your repo
+- **Fly.io**: Use the Dockerfile
 - **Google Cloud Run**: Build and deploy container
-- **Self-hosted**: `pnpm build && pnpm start`
+- **Self-hosted**: Use Docker or `pnpm build && pnpm start`
 
 ## Configuring Resend Webhooks
 
