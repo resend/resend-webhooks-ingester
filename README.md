@@ -2,6 +2,29 @@
 
 A self-hosted webhook ingester for [Resend](https://resend.com) that stores email, contact, and domain events in your database. Built with Next.js for easy deployment to Vercel or your preferred hosting platform.
 
+## Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/resend/resend-webhooks-ingester&env=RESEND_WEBHOOK_SECRET&envDescription=Your%20Resend%20webhook%20signing%20secret&envLink=https://resend.com/webhooks)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/resend/resend-webhooks-ingester)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/resend/resend-webhooks-ingester)
+
+Or use [Docker](#docker): `docker pull ghcr.io/resend/resend-webhooks-ingester`
+
+## Table of Contents
+
+- [Features](#features)
+- [Supported Databases](#supported-databases)
+- [Supported Event Types](#supported-event-types)
+- [Quick Start](#quick-start)
+- [Database Setup](#database-setup)
+- [Running Locally](#running-locally)
+- [Development & Testing](#development--testing)
+- [Deployment](#deployment)
+- [Configuring Resend Webhooks](#configuring-resend-webhooks)
+- [API Reference](#api-reference)
+- [Data Retention](#data-retention)
+- [Troubleshooting](#troubleshooting)
+
 ## Features
 
 - Receives and verifies Resend webhooks using Svix signatures
@@ -283,12 +306,6 @@ Tests use `.env.test` for configuration. The `dev:test` script loads this file a
 
 ## Deployment
 
-### One-Click Deploy
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/resend/resend-webhooks-ingester)
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/resend/resend-webhooks-ingester)
-
 ### Docker
 
 Pull the image from GitHub Container Registry:
@@ -315,6 +332,8 @@ docker run -p 3000:3000 -e ... resend-webhooks-ingester
 ```
 
 ### Vercel
+
+Use the [deploy button](#deploy) above, or:
 
 1. Push your code to GitHub
 2. Import the repository in [Vercel](https://vercel.com)
