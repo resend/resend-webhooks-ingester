@@ -1,7 +1,9 @@
 services:
   - type: web
-    runtime: docker
+    runtime: node
     name: resend-webhooks-ingester
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm start
     healthCheckPath: /
     envVars:
       - key: RESEND_WEBHOOK_SECRET
