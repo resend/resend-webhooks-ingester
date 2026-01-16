@@ -238,6 +238,49 @@ ngrok http 3000
 
 Use the ngrok URL (e.g., `https://abc123.ngrok.io/supabase`) as your webhook endpoint in Resend.
 
+## Development & Testing
+
+### Running Tests Locally
+
+The project includes integration tests for MongoDB, PostgreSQL, MySQL, and ClickHouse.
+
+**1. Start databases with Docker Compose:**
+
+```bash
+docker compose up -d
+```
+
+**2. Apply schemas to test databases:**
+
+```bash
+pnpm db:setup
+```
+
+**3. Start the dev server with test environment:**
+
+```bash
+pnpm dev:test
+```
+
+**4. Run tests (in another terminal):**
+
+```bash
+pnpm test
+```
+
+Or run tests for a specific connector:
+
+```bash
+pnpm test:mongodb
+pnpm test:postgresql
+pnpm test:mysql
+pnpm test:clickhouse
+```
+
+### Test Environment
+
+Tests use `.env.test` for configuration. The `dev:test` script loads this file automatically via dotenv-cli.
+
 ## Deployment
 
 ### Vercel (Recommended)
@@ -299,6 +342,19 @@ schemas/
 ├── snowflake.sql             # Snowflake schema
 ├── bigquery.sql              # BigQuery schema
 └── clickhouse.sql            # ClickHouse schema
+
+tests/
+├── setup.ts                  # Test configuration
+├── helpers/
+│   ├── svix.ts               # Webhook signature generation
+│   ├── fixtures.ts           # Sample event payloads
+│   ├── db-clients.ts         # DB clients for assertions
+│   └── test-factory.ts       # Shared test cases
+└── integration/
+    ├── mongodb.test.ts
+    ├── postgresql.test.ts
+    ├── mysql.test.ts
+    └── clickhouse.test.ts
 ```
 
 ## API Reference

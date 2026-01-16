@@ -11,6 +11,10 @@ import type {
   EmailWebhookEvent,
 } from '@/types/webhook';
 
+function toClickHouseDateTime(isoString: string): string {
+  return isoString.replace('T', ' ').replace('Z', '');
+}
+
 function getClient() {
   const url = process.env.CLICKHOUSE_URL;
   const username = process.env.CLICKHOUSE_USERNAME;
@@ -45,13 +49,13 @@ async function insertEmailEvent(
       {
         svix_id: svixId,
         event_type: data.event_type,
-        event_created_at: data.event_created_at,
-        webhook_received_at: new Date().toISOString(),
+        event_created_at: toClickHouseDateTime(data.event_created_at),
+        webhook_received_at: toClickHouseDateTime(new Date().toISOString()),
         email_id: data.email_id,
         from_address: data.from_address,
         to_addresses: data.to_addresses,
         subject: data.subject,
-        email_created_at: data.email_created_at,
+        email_created_at: toClickHouseDateTime(data.email_created_at),
         broadcast_id: data.broadcast_id || '',
         template_id: data.template_id || '',
         tags: data.tags ? JSON.stringify(data.tags) : '',
@@ -82,8 +86,8 @@ async function insertContactEvent(
       {
         svix_id: svixId,
         event_type: data.event_type,
-        event_created_at: data.event_created_at,
-        webhook_received_at: new Date().toISOString(),
+        event_created_at: toClickHouseDateTime(data.event_created_at),
+        webhook_received_at: toClickHouseDateTime(new Date().toISOString()),
         contact_id: data.contact_id,
         audience_id: data.audience_id,
         segment_ids: data.segment_ids,
@@ -91,8 +95,8 @@ async function insertContactEvent(
         first_name: data.first_name || '',
         last_name: data.last_name || '',
         unsubscribed: data.unsubscribed ? 1 : 0,
-        contact_created_at: data.contact_created_at,
-        contact_updated_at: data.contact_updated_at,
+        contact_created_at: toClickHouseDateTime(data.contact_created_at),
+        contact_updated_at: toClickHouseDateTime(data.contact_updated_at),
       },
     ],
     format: 'JSONEachRow',
@@ -112,13 +116,13 @@ async function insertDomainEvent(
       {
         svix_id: svixId,
         event_type: data.event_type,
-        event_created_at: data.event_created_at,
-        webhook_received_at: new Date().toISOString(),
+        event_created_at: toClickHouseDateTime(data.event_created_at),
+        webhook_received_at: toClickHouseDateTime(new Date().toISOString()),
         domain_id: data.domain_id,
         name: data.name,
         status: data.status,
         region: data.region,
-        domain_created_at: data.domain_created_at,
+        domain_created_at: toClickHouseDateTime(data.domain_created_at),
         records: data.records ? JSON.stringify(data.records) : '',
       },
     ],

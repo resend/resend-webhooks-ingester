@@ -1,0 +1,105 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+      postgresql:
+        image: postgres:16
+        env:
+          POSTGRES_DB: resend_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: resend_test
+          MYSQL_ROOT_PASSWORD: mysql
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      clickhouse:
+        image: clickhouse/clickhouse-server:24
+        ports:
+          - 8123:8123
+          - 9000:9000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup test databases
+        run: pnpm db:setup
+        env:
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DATABASE: resend_test
+          POSTGRESQL_URL: postgres://postgres:postgres@localhost:5432/resend_test
+          MYSQL_URL: mysql://root:mysql@localhost:3306/resend_test
+          CLICKHOUSE_URL: http://localhost:8123
+          CLICKHOUSE_DATABASE: resend_test
+
+      - name: Start dev server
+        run: pnpm dev &
+        env:
+          RESEND_WEBHOOK_SECRET: whsec_dGVzdF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nXzEyMzQ=
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DATABASE: resend_test
+          POSTGRESQL_URL: postgres://postgres:postgres@localhost:5432/resend_test
+          MYSQL_URL: mysql://root:mysql@localhost:3306/resend_test
+          CLICKHOUSE_URL: http://localhost:8123
+          CLICKHOUSE_DATABASE: resend_test
+
+      - name: Wait for server
+        run: |
+          for i in {1..30}; do
+            curl -s http://localhost:3000 && break
+            sleep 1
+          done
+
+      - name: Run tests
+        run: pnpm test
+        env:
+          RESEND_WEBHOOK_SECRET: whsec_dGVzdF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nXzEyMzQ=
+          APP_BASE_URL: http://localhost:3000
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DATABASE: resend_test
+          POSTGRESQL_URL: postgres://postgres:postgres@localhost:5432/resend_test
+          MYSQL_URL: mysql://root:mysql@localhost:3306/resend_test
+          CLICKHOUSE_URL: http://localhost:8123
+          CLICKHOUSE_DATABASE: resend_test

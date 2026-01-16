@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: resend_test
+    volumes:
+      - mongodb_data:/data/db
+
+  postgresql:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: resend_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+
+  mysql:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: resend_test
+      MYSQL_ROOT_PASSWORD: mysql
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: resend_test
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+volumes:
+  mongodb_data:
+  postgresql_data:
+  mysql_data:
+  clickhouse_data:
