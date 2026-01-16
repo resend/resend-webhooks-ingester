@@ -33,4 +33,9 @@ export const TEST_CONFIG = {
   planetscale: {
     url: process.env.PLANETSCALE_URL || '',
   },
+  bigquery: {
+    projectId: process.env.BIGQUERY_PROJECT_ID || '',
+    datasetId: process.env.BIGQUERY_DATASET_ID || '',
+    credentials: process.env.BIGQUERY_CREDENTIALS || '',
+  },
 };

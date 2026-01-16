@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS YOUR_DATASET.resend_wh_emails (
   event_created_at TIMESTAMP NOT NULL,
   email_id STRING NOT NULL,
   from_address STRING NOT NULL,
-  to_addresses ARRAY<STRING> NOT NULL,
+  to_addresses ARRAY<STRING>,
   subject STRING NOT NULL,
   email_created_at TIMESTAMP NOT NULL,
   broadcast_id STRING,

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createClient as createClickHouseClient } from '@clickhouse/client';
+import { BigQuery } from '@google-cloud/bigquery';
 import { config } from 'dotenv';
 import { MongoClient } from 'mongodb';
 import mysql from 'mysql2/promise';
@@ -28,9 +29,13 @@ async function setupPostgreSQL() {
 async function setupSupabase() {
   console.info('Setting up Supabase...');
   if (!process.env.SUPABASE_DB_URL) {
-    throw new Error('SUPABASE_DB_URL not set. Get it from Supabase dashboard: Settings > Database > Connection string');
+    throw new Error(
+      'SUPABASE_DB_URL not set. Get it from Supabase dashboard: Settings > Database > Connection string',
+    );
   }
-  const client = new PgClient({ connectionString: process.env.SUPABASE_DB_URL });
+  const client = new PgClient({
+    connectionString: process.env.SUPABASE_DB_URL,
+  });
   await client.connect();
 
   const schema = fs.readFileSync(
@@ -143,6 +148,51 @@ async function setupClickHouse() {
   console.info('ClickHouse setup complete');
 }
 
+async function setupBigQuery() {
+  console.info('Setting up BigQuery...');
+  const projectId = process.env.BIGQUERY_PROJECT_ID;
+  const datasetId = process.env.BIGQUERY_DATASET_ID;
+  const credentials = process.env.BIGQUERY_CREDENTIALS;
+
+  if (!projectId || !datasetId) {
+    throw new Error(
+      'BIGQUERY_PROJECT_ID or BIGQUERY_DATASET_ID not set. Get these from Google Cloud Console.',
+    );
+  }
+
+  const options: { projectId: string; credentials?: object } = { projectId };
+  if (credentials) {
+    options.credentials = JSON.parse(credentials);
+  }
+
+  const bigquery = new BigQuery(options);
+
+  const schema = fs.readFileSync(
+    path.join(SCHEMAS_DIR, 'bigquery.sql'),
+    'utf-8',
+  );
+
+  const statements = schema
+    .split(';')
+    .map((s) =>
+      s
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('--'))
+        .join('\n')
+        .replace(/YOUR_DATASET/g, datasetId)
+        .trim(),
+    )
+    .filter((s) => s.length > 0);
+
+  for (const statement of statements) {
+    if (statement.trim()) {
+      await bigquery.query({ query: statement });
+    }
+  }
+
+  console.info('BigQuery setup complete');
+}
+
 async function main() {
   console.info('Starting test database setup...\n');
 
@@ -168,6 +218,11 @@ async function main() {
 
   if (runAll || args.includes('--clickhouse') || args.includes('--ch')) {
     await setupClickHouse();
+  }
+
+  // BigQuery requires real credentials - not run by default
+  if (args.includes('--bigquery') || args.includes('--bq')) {
+    await setupBigQuery();
   }
 
   console.info('\nAll requested databases set up successfully!');

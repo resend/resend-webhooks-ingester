@@ -2,6 +2,7 @@ import {
   type ClickHouseClient,
   createClient as createClickHouseClient,
 } from '@clickhouse/client';
+import { BigQuery } from '@google-cloud/bigquery';
 import { type Db, MongoClient } from 'mongodb';
 import mysql from 'mysql2/promise';
 import { Client as PgClient } from 'pg';
@@ -313,5 +314,72 @@ export class ClickHouseTestClient {
       await this.client.close();
       this.client = null;
     }
+  }
+}
+
+export class BigQueryTestClient {
+  private bigquery: BigQuery | null = null;
+  private projectId: string | null = null;
+  private datasetId: string | null = null;
+
+  async connect() {
+    const projectId = TEST_CONFIG.bigquery.projectId;
+    const datasetId = TEST_CONFIG.bigquery.datasetId;
+    const credentials = TEST_CONFIG.bigquery.credentials;
+
+    if (!projectId || !datasetId) {
+      throw new Error(
+        'BIGQUERY_PROJECT_ID or BIGQUERY_DATASET_ID not set. Get these from your Google Cloud Console.',
+      );
+    }
+
+    const options: { projectId: string; credentials?: object } = { projectId };
+    if (credentials) {
+      options.credentials = JSON.parse(credentials);
+    }
+
+    this.bigquery = new BigQuery(options);
+    this.projectId = projectId;
+    this.datasetId = datasetId;
+  }
+
+  async findBySvixId(table: CollectionName, svixId: string) {
+    if (!this.bigquery || !this.projectId || !this.datasetId) {
+      throw new Error('Not connected');
+    }
+
+    const [rows] = await this.bigquery.query({
+      query: `SELECT * FROM \`${this.projectId}.${this.datasetId}.${table}\` WHERE svix_id = @svixId LIMIT 1`,
+      params: { svixId },
+    });
+    return rows[0] || null;
+  }
+
+  async countBySvixId(table: CollectionName, svixId: string): Promise<number> {
+    if (!this.bigquery || !this.projectId || !this.datasetId) {
+      throw new Error('Not connected');
+    }
+
+    const [rows] = await this.bigquery.query({
+      query: `SELECT COUNT(*) as count FROM \`${this.projectId}.${this.datasetId}.${table}\` WHERE svix_id = @svixId`,
+      params: { svixId },
+    });
+    return Number.parseInt(rows[0]?.count || '0', 10);
+  }
+
+  async truncate(table: CollectionName) {
+    if (!this.bigquery || !this.projectId || !this.datasetId) {
+      throw new Error('Not connected');
+    }
+
+    await this.bigquery.query({
+      query: `DELETE FROM \`${this.projectId}.${this.datasetId}.${table}\` WHERE true`,
+    });
+  }
+
+  async close() {
+    this.bigquery = null;
+    this.projectId = null;
+    this.datasetId = null;
   }
 }

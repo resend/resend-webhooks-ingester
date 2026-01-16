@@ -21,6 +21,7 @@
     "test:postgresql": "vitest run tests/integration/postgresql.test.ts",
     "test:mysql": "vitest run tests/integration/mysql.test.ts",
     "test:planetscale": "vitest run tests/integration/planetscale.test.ts",
+    "test:bigquery": "vitest run tests/integration/bigquery.test.ts",
     "test:clickhouse": "vitest run tests/integration/clickhouse.test.ts",
     "db:setup": "tsx scripts/setup-test-dbs.ts"
   },
