@@ -12,6 +12,11 @@ export const TEST_CONFIG = {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
     database: process.env.MONGODB_DATABASE || 'resend_test',
   },
+  supabase: {
+    url: process.env.SUPABASE_URL || '',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    dbUrl: process.env.SUPABASE_DB_URL || '',
+  },
   postgresql: {
     url:
       process.env.POSTGRESQL_URL ||

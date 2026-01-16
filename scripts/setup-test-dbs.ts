@@ -25,6 +25,24 @@ async function setupPostgreSQL() {
   console.info('PostgreSQL setup complete');
 }
 
+async function setupSupabase() {
+  console.info('Setting up Supabase...');
+  if (!process.env.SUPABASE_DB_URL) {
+    throw new Error('SUPABASE_DB_URL not set. Get it from Supabase dashboard: Settings > Database > Connection string');
+  }
+  const client = new PgClient({ connectionString: process.env.SUPABASE_DB_URL });
+  await client.connect();
+
+  const schema = fs.readFileSync(
+    path.join(SCHEMAS_DIR, 'supabase.sql'),
+    'utf-8',
+  );
+  await client.query(schema);
+
+  await client.end();
+  console.info('Supabase setup complete');
+}
+
 async function setupMySQL() {
   console.info('Setting up MySQL...');
   const connection = await mysql.createConnection(process.env.MYSQL_URL!);
@@ -133,6 +151,11 @@ async function main() {
 
   if (runAll || args.includes('--postgresql') || args.includes('--pg')) {
     await setupPostgreSQL();
+  }
+
+  // Supabase requires real credentials - not run by default
+  if (args.includes('--supabase')) {
+    await setupSupabase();
   }
 
   if (runAll || args.includes('--mysql')) {

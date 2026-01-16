@@ -62,6 +62,60 @@ export class PostgreSQLTestClient {
   }
 }
 
+export class SupabaseTestClient {
+  private client: PgClient | null = null;
+
+  async connect() {
+    const dbUrl = TEST_CONFIG.supabase.dbUrl;
+    if (!dbUrl) {
+      throw new Error(
+        'SUPABASE_DB_URL not set. Get the connection string from your Supabase dashboard: Settings > Database > Connection string (URI)',
+      );
+    }
+    this.client = new PgClient({ connectionString: dbUrl });
+    await this.client.connect();
+  }
+
+  async findBySvixId(table: CollectionName, svixId: string) {
+    if (!this.client) {
+      throw new Error('Not connected');
+    }
+
+    const { rows } = await this.client.query(
+      `SELECT * FROM ${table} WHERE svix_id = $1`,
+      [svixId],
+    );
+    return rows[0] || null;
+  }
+
+  async countBySvixId(table: CollectionName, svixId: string): Promise<number> {
+    if (!this.client) {
+      throw new Error('Not connected');
+    }
+
+    const { rows } = await this.client.query(
+      `SELECT COUNT(*) as count FROM ${table} WHERE svix_id = $1`,
+      [svixId],
+    );
+    return Number.parseInt(rows[0].count, 10);
+  }
+
+  async truncate(table: CollectionName) {
+    if (!this.client) {
+      throw new Error('Not connected');
+    }
+
+    await this.client.query(`TRUNCATE TABLE ${table}`);
+  }
+
+  async close() {
+    if (this.client) {
+      await this.client.end();
+      this.client = null;
+    }
+  }
+}
+
 export class MySQLTestClient {
   private connection: mysql.Connection | null = null;
 

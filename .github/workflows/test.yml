@@ -63,7 +63,7 @@ jobs:
         run: pnpm install
 
       - name: Setup test databases
-        run: pnpm db:setup
+        run: pnpm db:setup --mongodb --postgresql --mysql --clickhouse
         env:
           MONGODB_URI: mongodb://localhost:27017
           MONGODB_DATABASE: resend_test
@@ -91,7 +91,7 @@ jobs:
           done
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm test --exclude tests/integration/supabase.test.ts
         env:
           RESEND_WEBHOOK_SECRET: whsec_dGVzdF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nXzEyMzQ=
           APP_BASE_URL: http://localhost:3000

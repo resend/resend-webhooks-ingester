@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:mongodb": "vitest run tests/integration/mongodb.test.ts",
+    "test:supabase": "vitest run tests/integration/supabase.test.ts",
     "test:postgresql": "vitest run tests/integration/postgresql.test.ts",
     "test:mysql": "vitest run tests/integration/mysql.test.ts",
     "test:clickhouse": "vitest run tests/integration/clickhouse.test.ts",

@@ -265,7 +265,13 @@ Use the ngrok URL (e.g., `https://abc123.ngrok.io/supabase`) as your webhook end
 
 ### Running Tests Locally
 
-The project includes integration tests for MongoDB, PostgreSQL, MySQL, and ClickHouse.
+The project includes integration tests for MongoDB, PostgreSQL, MySQL, and ClickHouse that run with Docker.
+
+**Cloud-only connectors** (require real accounts, not run in CI):
+- **Supabase** - Requires real Supabase project credentials
+- **PlanetScale** - Requires real PlanetScale account (uses same schema as MySQL)
+- **Snowflake** - Requires real Snowflake account
+- **BigQuery** - Requires real GCP project
 
 **1. Start databases with Docker Compose:**
 
@@ -295,6 +301,7 @@ Or run tests for a specific connector:
 
 ```bash
 pnpm test:mongodb
+pnpm test:supabase
 pnpm test:postgresql
 pnpm test:mysql
 pnpm test:clickhouse
@@ -303,6 +310,27 @@ pnpm test:clickhouse
 ### Test Environment
 
 Tests use `.env.test` for configuration. The `dev:test` script loads this file automatically via dotenv-cli.
+
+### Testing Cloud Connectors (Supabase, PlanetScale, etc.)
+
+To test cloud connectors like Supabase:
+
+1. Add your credentials to `.env.test`:
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
+```
+
+2. Run the schema setup (from Supabase SQL Editor or via CLI):
+```bash
+pnpm db:setup --supabase
+```
+
+3. Run the tests:
+```bash
+pnpm test:supabase
+```
 
 ## Deployment
 
@@ -403,6 +431,7 @@ tests/
 │   └── test-factory.ts       # Shared test cases
 └── integration/
     ├── mongodb.test.ts
+    ├── supabase.test.ts
     ├── postgresql.test.ts
     ├── mysql.test.ts
     └── clickhouse.test.ts
