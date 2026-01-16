@@ -5,7 +5,7 @@ A self-hosted webhook ingester for [Resend](https://resend.com) that stores emai
 ## Deploy
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/resend/resend-webhooks-ingester&env=RESEND_WEBHOOK_SECRET&envDescription=Your%20Resend%20webhook%20signing%20secret&envLink=https://resend.com/webhooks)
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/resend/resend-webhooks-ingester)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/cd2lvJ?referralCode=w2CHHM&utm_medium=integration&utm_source=template&utm_campaign=generic)
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/resend/resend-webhooks-ingester)
 
 Or use [Docker](#docker): `docker pull ghcr.io/resend/resend-webhooks-ingester`
