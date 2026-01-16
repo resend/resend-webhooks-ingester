@@ -6,6 +6,7 @@ import { config } from 'dotenv';
 import { MongoClient } from 'mongodb';
 import mysql from 'mysql2/promise';
 import { Client as PgClient } from 'pg';
+import snowflake from 'snowflake-sdk';
 
 config({ path: path.resolve(__dirname, '../.env.test') });
 
@@ -225,7 +226,98 @@ async function main() {
     await setupBigQuery();
   }
 
+  // Snowflake requires real credentials - not run by default
+  if (args.includes('--snowflake') || args.includes('--sf')) {
+    await setupSnowflake();
+  }
+
   console.info('\nAll requested databases set up successfully!');
+}
+
+async function setupSnowflake() {
+  console.info('Setting up Snowflake...');
+  const account = process.env.SNOWFLAKE_ACCOUNT;
+  const username = process.env.SNOWFLAKE_USERNAME;
+  const password = process.env.SNOWFLAKE_PASSWORD;
+  const database = process.env.SNOWFLAKE_DATABASE;
+  const schema = process.env.SNOWFLAKE_SCHEMA;
+  const warehouse = process.env.SNOWFLAKE_WAREHOUSE;
+
+  if (
+    !account ||
+    !username ||
+    !password ||
+    !database ||
+    !schema ||
+    !warehouse
+  ) {
+    throw new Error(
+      'Snowflake env vars not set. Set SNOWFLAKE_ACCOUNT, SNOWFLAKE_USERNAME, SNOWFLAKE_PASSWORD, SNOWFLAKE_DATABASE, SNOWFLAKE_SCHEMA, SNOWFLAKE_WAREHOUSE.',
+    );
+  }
+
+  const connection = snowflake.createConnection({
+    account,
+    username,
+    password,
+    database,
+    schema,
+    warehouse,
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    connection.connect((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+
+  const schemaFile = fs.readFileSync(
+    path.join(SCHEMAS_DIR, 'snowflake.sql'),
+    'utf-8',
+  );
+
+  const statements = schemaFile
+    .split(';')
+    .map((s) =>
+      s
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('--'))
+        .join('\n')
+        .trim(),
+    )
+    .filter((s) => s.length > 0);
+
+  for (const statement of statements) {
+    if (statement.trim()) {
+      await new Promise<void>((resolve, reject) => {
+        connection.execute({
+          sqlText: statement,
+          complete: (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          },
+        });
+      });
+    }
+  }
+
+  await new Promise<void>((resolve) => {
+    connection.destroy((err) => {
+      if (err) {
+        console.error('Error closing connection:', err);
+      }
+      resolve();
+    });
+  });
+
+  console.info('Snowflake setup complete');
 }
 
 main().catch((err) => {

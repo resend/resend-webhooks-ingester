@@ -78,6 +78,7 @@ async function insertEmailEvent(
   const data = prepareEmailEventData(event);
 
   // Snowflake doesn't have INSERT IGNORE, so we use MERGE
+  // Use PARSE_JSON for VARIANT columns and direct array for ARRAY columns
   const sql = `
     MERGE INTO resend_wh_emails t
     USING (SELECT ? AS svix_id) s
@@ -87,7 +88,7 @@ async function insertEmailEvent(
       subject, email_created_at, broadcast_id, template_id, tags,
       bounce_type, bounce_sub_type, bounce_message, bounce_diagnostic_code,
       click_ip_address, click_link, click_timestamp, click_user_agent
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, PARSE_JSON(?), ?, ?, ?, ?, PARSE_JSON(?), ?, ?, ?, PARSE_JSON(?), ?, ?, ?, ?)
   `;
 
   await executeQuery(connection, sql, [
@@ -97,16 +98,18 @@ async function insertEmailEvent(
     data.event_created_at,
     data.email_id,
     data.from_address,
-    data.to_addresses,
+    JSON.stringify(data.to_addresses || []),
     data.subject,
     data.email_created_at,
     data.broadcast_id,
     data.template_id,
-    data.tags ? JSON.stringify(data.tags) : null,
+    data.tags ? JSON.stringify(data.tags) : 'null',
     data.bounce_type,
     data.bounce_sub_type,
     data.bounce_message,
-    data.bounce_diagnostic_code,
+    data.bounce_diagnostic_code
+      ? JSON.stringify(data.bounce_diagnostic_code)
+      : 'null',
     data.click_ip_address,
     data.click_link,
     data.click_timestamp,
@@ -128,7 +131,7 @@ async function insertContactEvent(
     WHEN NOT MATCHED THEN INSERT (
       svix_id, event_type, event_created_at, contact_id, audience_id, segment_ids,
       email, first_name, last_name, unsubscribed, contact_created_at, contact_updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, PARSE_JSON(?), ?, ?, ?, ?, ?, ?)
   `;
 
   await executeQuery(connection, sql, [
@@ -138,7 +141,7 @@ async function insertContactEvent(
     data.event_created_at,
     data.contact_id,
     data.audience_id,
-    data.segment_ids,
+    JSON.stringify(data.segment_ids || []),
     data.email,
     data.first_name,
     data.last_name,
@@ -162,7 +165,7 @@ async function insertDomainEvent(
     WHEN NOT MATCHED THEN INSERT (
       svix_id, event_type, event_created_at, domain_id, name, status,
       region, domain_created_at, records
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, PARSE_JSON(?))
   `;
 
   await executeQuery(connection, sql, [
@@ -175,7 +178,7 @@ async function insertDomainEvent(
     data.status,
     data.region,
     data.domain_created_at,
-    data.records ? JSON.stringify(data.records) : null,
+    data.records ? JSON.stringify(data.records) : 'null',
   ]);
 }
 

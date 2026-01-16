@@ -91,7 +91,7 @@ jobs:
           done
 
       - name: Run tests
-        run: pnpm test --exclude tests/integration/supabase.test.ts --exclude tests/integration/planetscale.test.ts --exclude tests/integration/bigquery.test.ts
+        run: pnpm test --exclude tests/integration/supabase.test.ts --exclude tests/integration/planetscale.test.ts --exclude tests/integration/bigquery.test.ts --exclude tests/integration/snowflake.test.ts
         env:
           RESEND_WEBHOOK_SECRET: whsec_dGVzdF9zZWNyZXRfa2V5X2Zvcl90ZXN0aW5nXzEyMzQ=
           APP_BASE_URL: http://localhost:3000

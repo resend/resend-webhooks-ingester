@@ -6,6 +6,7 @@ import { BigQuery } from '@google-cloud/bigquery';
 import { type Db, MongoClient } from 'mongodb';
 import mysql from 'mysql2/promise';
 import { Client as PgClient } from 'pg';
+import snowflake from 'snowflake-sdk';
 import { TEST_CONFIG } from '../setup';
 
 type CollectionName =
@@ -381,5 +382,108 @@ export class BigQueryTestClient {
     this.bigquery = null;
     this.projectId = null;
     this.datasetId = null;
+  }
+}
+
+export class SnowflakeTestClient {
+  private connection: snowflake.Connection | null = null;
+
+  async connect() {
+    const { account, username, password, database, schema, warehouse } =
+      TEST_CONFIG.snowflake;
+
+    if (
+      !account ||
+      !username ||
+      !password ||
+      !database ||
+      !schema ||
+      !warehouse
+    ) {
+      throw new Error(
+        'Snowflake env vars not set. Set SNOWFLAKE_ACCOUNT, SNOWFLAKE_USERNAME, SNOWFLAKE_PASSWORD, SNOWFLAKE_DATABASE, SNOWFLAKE_SCHEMA, SNOWFLAKE_WAREHOUSE.',
+      );
+    }
+
+    this.connection = snowflake.createConnection({
+      account,
+      username,
+      password,
+      database,
+      schema,
+      warehouse,
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      this.connection!.connect((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  private executeQuery<T>(sql: string, binds: unknown[] = []): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+      this.connection!.execute({
+        sqlText: sql,
+        binds: binds as snowflake.Binds,
+        complete: (err, _stmt, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve((rows || []) as T[]);
+          }
+        },
+      });
+    });
+  }
+
+  async findBySvixId(table: CollectionName, svixId: string) {
+    if (!this.connection) {
+      throw new Error('Not connected');
+    }
+
+    const rows = await this.executeQuery<Record<string, unknown>>(
+      `SELECT * FROM ${table} WHERE svix_id = ? LIMIT 1`,
+      [svixId],
+    );
+    return rows[0] || null;
+  }
+
+  async countBySvixId(table: CollectionName, svixId: string): Promise<number> {
+    if (!this.connection) {
+      throw new Error('Not connected');
+    }
+
+    const rows = await this.executeQuery<{ COUNT: number }>(
+      `SELECT COUNT(*) as COUNT FROM ${table} WHERE svix_id = ?`,
+      [svixId],
+    );
+    return rows[0]?.COUNT || 0;
+  }
+
+  async truncate(table: CollectionName) {
+    if (!this.connection) {
+      throw new Error('Not connected');
+    }
+
+    await this.executeQuery(`TRUNCATE TABLE ${table}`);
+  }
+
+  async close() {
+    if (this.connection) {
+      await new Promise<void>((resolve) => {
+        this.connection!.destroy((err) => {
+          if (err) {
+            console.error('Error closing Snowflake connection:', err);
+          }
+          resolve();
+        });
+      });
+      this.connection = null;
+    }
   }
 }

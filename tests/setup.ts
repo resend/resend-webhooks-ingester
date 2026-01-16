@@ -38,4 +38,12 @@ export const TEST_CONFIG = {
     datasetId: process.env.BIGQUERY_DATASET_ID || '',
     credentials: process.env.BIGQUERY_CREDENTIALS || '',
   },
+  snowflake: {
+    account: process.env.SNOWFLAKE_ACCOUNT || '',
+    username: process.env.SNOWFLAKE_USERNAME || '',
+    password: process.env.SNOWFLAKE_PASSWORD || '',
+    database: process.env.SNOWFLAKE_DATABASE || '',
+    schema: process.env.SNOWFLAKE_SCHEMA || '',
+    warehouse: process.env.SNOWFLAKE_WAREHOUSE || '',
+  },
 };
