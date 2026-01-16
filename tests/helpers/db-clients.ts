@@ -209,6 +209,59 @@ export class MongoDBTestClient {
   }
 }
 
+export class PlanetScaleTestClient {
+  private connection: mysql.Connection | null = null;
+
+  async connect() {
+    const url = TEST_CONFIG.planetscale.url;
+    if (!url) {
+      throw new Error(
+        'PLANETSCALE_URL not set. Get the connection string from your PlanetScale dashboard.',
+      );
+    }
+    this.connection = await mysql.createConnection(url);
+  }
+
+  async findBySvixId(table: CollectionName, svixId: string) {
+    if (!this.connection) {
+      throw new Error('Not connected');
+    }
+
+    const [rows] = await this.connection.execute(
+      `SELECT * FROM ${table} WHERE svix_id = ?`,
+      [svixId],
+    );
+    return (rows as mysql.RowDataPacket[])[0] || null;
+  }
+
+  async countBySvixId(table: CollectionName, svixId: string): Promise<number> {
+    if (!this.connection) {
+      throw new Error('Not connected');
+    }
+
+    const [rows] = await this.connection.execute(
+      `SELECT COUNT(*) as count FROM ${table} WHERE svix_id = ?`,
+      [svixId],
+    );
+    return (rows as mysql.RowDataPacket[])[0].count;
+  }
+
+  async truncate(table: CollectionName) {
+    if (!this.connection) {
+      throw new Error('Not connected');
+    }
+
+    await this.connection.execute(`DELETE FROM ${table}`);
+  }
+
+  async close() {
+    if (this.connection) {
+      await this.connection.end();
+      this.connection = null;
+    }
+  }
+}
+
 export class ClickHouseTestClient {
   private client: ClickHouseClient | null = null;
 

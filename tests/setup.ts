@@ -30,4 +30,7 @@ export const TEST_CONFIG = {
     url: process.env.CLICKHOUSE_URL || 'http://localhost:8123',
     database: process.env.CLICKHOUSE_DATABASE || 'resend_test',
   },
+  planetscale: {
+    url: process.env.PLANETSCALE_URL || '',
+  },
 };
