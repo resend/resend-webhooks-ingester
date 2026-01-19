@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS YOUR_DATASET.resend_wh_contacts (
   webhook_received_at TIMESTAMP NOT NULL,
   event_created_at TIMESTAMP NOT NULL,
   contact_id STRING NOT NULL,
-  audience_id STRING NOT NULL,
+  audience_id STRING,
   segment_ids ARRAY<STRING>,
   email STRING NOT NULL,
   first_name STRING,

@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS resend_wh_contacts (
 
   -- Contact fields
   contact_id TEXT NOT NULL,
-  audience_id TEXT NOT NULL,
+  audience_id TEXT,
   segment_ids TEXT[],
   email TEXT NOT NULL,
   first_name TEXT,

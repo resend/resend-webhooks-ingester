@@ -140,7 +140,7 @@ export function prepareContactEventData(event: ContactWebhookEvent) {
     event_type: type,
     event_created_at: created_at,
     contact_id: eventData.id,
-    audience_id: eventData.audience_id,
+    audience_id: eventData.audience_id ?? null,
     segment_ids: eventData.segment_ids,
     email: eventData.email,
     first_name: eventData.first_name ?? null,

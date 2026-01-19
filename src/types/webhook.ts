@@ -69,7 +69,7 @@ export interface EmailEventData {
 // Contact event data
 export interface ContactEventData {
   id: string;
-  audience_id: string;
+  audience_id?: string;
   segment_ids: string[];
   created_at: string;
   updated_at: string;

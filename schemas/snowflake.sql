@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS resend_wh_contacts (
   webhook_received_at TIMESTAMP_TZ NOT NULL DEFAULT CURRENT_TIMESTAMP(),
   event_created_at TIMESTAMP_TZ NOT NULL,
   contact_id STRING NOT NULL,
-  audience_id STRING NOT NULL,
+  audience_id STRING,
   segment_ids ARRAY,
   email STRING NOT NULL,
   first_name STRING,
