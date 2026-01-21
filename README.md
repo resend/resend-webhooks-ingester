@@ -10,6 +10,12 @@ A self-hosted webhook ingester for [Resend](https://resend.com) that stores emai
 
 Or use [Docker](#docker): `docker pull ghcr.io/resend/resend-webhooks-ingester`
 
+## Documentation
+
+For complete documentation, setup guides, and best practices, visit the official documentation:
+
+**[https://resend.com/docs/webhooks/ingester](https://resend.com/docs/webhooks/ingester)**
+
 ## Table of Contents
 
 - [Features](#features)
