@@ -14,7 +14,7 @@ Or use [Docker](#docker): `docker pull ghcr.io/resend/resend-webhooks-ingester`
 
 For complete documentation, setup guides, and best practices, visit the official documentation:
 
-**[https://resend.com/docs/webhooks/ingester](https://resend.com/docs/webhooks/ingester)**
+**[https://resend.com/dashboard/webhooks/](https://resend.com/dashboard/webhooks/)**
 
 ## Table of Contents
 
