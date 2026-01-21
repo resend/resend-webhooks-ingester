@@ -1,6 +1,6 @@
 # Resend Webhooks Ingester
 
-A self-hosted webhook ingester for [Resend](https://resend.com) that stores email, contact, and domain events in your database. Built with Next.js for easy deployment to Vercel or your preferred hosting platform.
+A self-hosted webhook ingester for [Resend](https://resend.com) that stores email, contact, and domain events in your database. Built with Next.js for easy deployment to Vercel or your preferred hosting platform. [Learn more about storing webhooks data](https://resend.com/dashboard/webhooks/how-to-store-webhooks-data)
 
 ## Deploy
 
@@ -9,12 +9,6 @@ A self-hosted webhook ingester for [Resend](https://resend.com) that stores emai
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/resend/resend-webhooks-ingester)
 
 Or use [Docker](#docker): `docker pull ghcr.io/resend/resend-webhooks-ingester`
-
-## Documentation
-
-For complete documentation, setup guides, and best practices, visit the official documentation:
-
-**[https://resend.com/dashboard/webhooks/](https://resend.com/dashboard/webhooks/)**
 
 ## Table of Contents
 
