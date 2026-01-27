@@ -41,7 +41,8 @@ Or use [Docker](#docker): `docker pull ghcr.io/resend/resend-webhooks-ingester`
 | [Supabase](#supabase) | `/supabase` | Quick setup with managed Postgres |
 | [PostgreSQL](#postgresql) | `/postgresql` | Self-hosted or managed Postgres (Neon, Railway, Render) |
 | [MySQL](#mysql) | `/mysql` | Self-hosted or managed MySQL |
-| [PlanetScale](#planetscale) | `/planetscale` | Serverless MySQL |
+| [PlanetScale Postgres](#planetscale-postgres) | `/postgresql` | Serverless Postgres |
+| [PlanetScale MySQL](#planetscale-mysql) | `/planetscale` | Serverless MySQL |
 | [MongoDB](#mongodb) | `/mongodb` | Document database (Atlas, self-hosted) |
 | [Snowflake](#snowflake) | `/snowflake` | Data warehousing and analytics |
 | [BigQuery](#bigquery) | `/bigquery` | Google Cloud analytics |
@@ -153,7 +154,22 @@ MYSQL_URL=mysql://user:password@host:3306/database
 
 ---
 
-### PlanetScale
+### PlanetScale Postgres
+
+**Environment Variables:**
+```env
+POSTGRESQL_URL=postgresql://username:password@host:5432/postgres?sslmode=verify-full
+```
+
+Get your connection string from the PlanetScale dashboard under **Connect > Create role**.
+
+**Schema:** Run `schemas/postgresql.sql` in your PlanetScale database.
+
+**Endpoint:** `POST /postgresql`
+
+---
+
+### PlanetScale MySQL
 
 **Environment Variables:**
 ```env
@@ -162,7 +178,7 @@ PLANETSCALE_URL=mysql://username:password@host/database?ssl={"rejectUnauthorized
 
 Get your connection string from the PlanetScale dashboard under **Connect > Create password**.
 
-**Schema:** Run `schemas/mysql.sql` in your PlanetScale database (uses MySQL syntax).
+**Schema:** Run `schemas/mysql.sql` in your PlanetScale database.
 
 **Endpoint:** `POST /planetscale`
 
