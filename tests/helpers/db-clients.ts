@@ -3,6 +3,7 @@ import {
   createClient as createClickHouseClient,
 } from '@clickhouse/client';
 import { BigQuery } from '@google-cloud/bigquery';
+import { Pool as NeonPool } from '@neondatabase/serverless';
 import { type Db, MongoClient } from 'mongodb';
 import mysql from 'mysql2/promise';
 import { Client as PgClient } from 'pg';
@@ -60,6 +61,59 @@ export class PostgreSQLTestClient {
     if (this.client) {
       await this.client.end();
       this.client = null;
+    }
+  }
+}
+
+export class NeonTestClient {
+  private pool: NeonPool | null = null;
+
+  async connect() {
+    const url = TEST_CONFIG.neon.url;
+    if (!url) {
+      throw new Error(
+        'NEON_DATABASE_URL not set. Get the connection string from your Neon Console.',
+      );
+    }
+    this.pool = new NeonPool({ connectionString: url });
+  }
+
+  async findBySvixId(table: CollectionName, svixId: string) {
+    if (!this.pool) {
+      throw new Error('Not connected');
+    }
+
+    const { rows } = await this.pool.query(
+      `SELECT * FROM ${table} WHERE svix_id = $1`,
+      [svixId],
+    );
+    return rows[0] || null;
+  }
+
+  async countBySvixId(table: CollectionName, svixId: string): Promise<number> {
+    if (!this.pool) {
+      throw new Error('Not connected');
+    }
+
+    const { rows } = await this.pool.query(
+      `SELECT COUNT(*) as count FROM ${table} WHERE svix_id = $1`,
+      [svixId],
+    );
+    return Number.parseInt(rows[0].count, 10);
+  }
+
+  async truncate(table: CollectionName) {
+    if (!this.pool) {
+      throw new Error('Not connected');
+    }
+
+    await this.pool.query(`TRUNCATE TABLE ${table}`);
+  }
+
+  async close() {
+    if (this.pool) {
+      await this.pool.end();
+      this.pool = null;
     }
   }
 }

@@ -40,6 +40,7 @@ Or use [Docker](#docker): `docker pull ghcr.io/resend/resend-webhooks-ingester`
 |-----------|----------|----------|
 | [Supabase](#supabase) | `/supabase` | Quick setup with managed Postgres |
 | [PostgreSQL](#postgresql) | `/postgresql` | Self-hosted or managed Postgres (Neon, Railway, Render) |
+| [Neon](#neon) | `/neon` | Serverless environments (Vercel, Netlify, Cloudflare) |
 | [MySQL](#mysql) | `/mysql` | Self-hosted or managed MySQL |
 | [PlanetScale Postgres](#planetscale-postgres) | `/postgresql` | Serverless Postgres |
 | [PlanetScale MySQL](#planetscale-mysql) | `/planetscale` | Serverless MySQL |
@@ -138,6 +139,21 @@ POSTGRESQL_URL=postgresql://user:password@host:5432/database
 **Schema:** Run `schemas/postgresql.sql` in your database.
 
 **Endpoint:** `POST /postgresql`
+
+---
+
+### Neon
+
+Recommended for serverless environments (Vercel, Netlify, Cloudflare). For long-running servers, use the PostgreSQL connector instead.
+
+**Environment Variables:**
+```env
+NEON_DATABASE_URL=postgresql://user:password@ep-xyz.us-east-1.aws.neon.tech/database?sslmode=require
+```
+
+**Schema:** Run `schemas/postgresql.sql` in your Neon database.
+
+**Endpoint:** `POST /neon`
 
 ---
 
@@ -416,6 +432,7 @@ src/
 │   ├── page.tsx              # Empty root page
 │   ├── supabase/route.ts     # Supabase connector
 │   ├── postgresql/route.ts   # PostgreSQL connector
+│   ├── neon/route.ts         # Neon serverless connector
 │   ├── mysql/route.ts        # MySQL connector
 │   ├── planetscale/route.ts  # PlanetScale connector
 │   ├── mongodb/route.ts      # MongoDB connector
