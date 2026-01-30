@@ -19,6 +19,7 @@
     "test:mongodb": "vitest run tests/integration/mongodb.test.ts",
     "test:supabase": "vitest run tests/integration/supabase.test.ts",
     "test:postgresql": "vitest run tests/integration/postgresql.test.ts",
+    "test:neon": "vitest run tests/integration/neon.test.ts",
     "test:mysql": "vitest run tests/integration/mysql.test.ts",
     "test:planetscale": "vitest run tests/integration/planetscale.test.ts",
     "test:bigquery": "vitest run tests/integration/bigquery.test.ts",
@@ -29,6 +30,7 @@
   "dependencies": {
     "@clickhouse/client": "1.8.1",
     "@google-cloud/bigquery": "7.9.1",
+    "@neondatabase/serverless": "1.0.2",
     "@planetscale/database": "1.19.0",
     "@supabase/supabase-js": "2.49.9",
     "mongodb": "6.12.0",
