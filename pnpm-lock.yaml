@@ -15,7 +15,7 @@ importers:
         specifier: 7.9.1
         version: 7.9.1
       '@neondatabase/serverless':
-        specifier: ^1.0.2
+        specifier: 1.0.2
         version: 1.0.2
       '@planetscale/database':
         specifier: 1.19.0
