@@ -1,6 +1,6 @@
 {
   "name": "resend-webhooks-ingester",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "packageManager": "pnpm@10.11.0",
   "engines": {
