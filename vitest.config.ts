@@ -9,6 +9,7 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     exclude: [
       'tests/integration/supabase.test.ts',
+      'tests/integration/neon.test.ts',
       'tests/integration/planetscale.test.ts',
       'tests/integration/bigquery.test.ts',
       'tests/integration/snowflake.test.ts',

@@ -10,6 +10,9 @@ declare namespace NodeJS {
     // PostgreSQL
     POSTGRESQL_URL?: string;
 
+    // Neon
+    NEON_DATABASE_URL?: string;
+
     // MySQL
     MYSQL_URL?: string;
 

@@ -14,6 +14,9 @@ importers:
       '@google-cloud/bigquery':
         specifier: 7.9.1
         version: 7.9.1
+      '@neondatabase/serverless':
+        specifier: 1.0.2
+        version: 1.0.2
       '@planetscale/database':
         specifier: 1.19.0
         version: 1.19.0
@@ -710,6 +713,10 @@ packages:
 
   '@mongodb-js/saslprep@1.4.4':
     resolution: {integrity: sha512-p7X/ytJDIdwUfFL/CLOhKgdfJe1Fa8uw9seJYvdOmnP9JBWGWHW69HkOixXS6Wy9yvGf1MbhcS6lVmrhy4jm2g==}
+
+  '@neondatabase/serverless@1.0.2':
+    resolution: {integrity: sha512-I5sbpSIAHiB+b6UttofhrN/UJXII+4tZPAq1qugzwCwLIL8EZLV7F/JyHUrEIiGgQpEXzpnjlJ+zwcEhheGvCw==}
+    engines: {node: '>=19.0.0'}
 
   '@next/env@16.1.1':
     resolution: {integrity: sha512-3oxyM97Sr2PqiVyMyrZUtrtM3jqqFxOQJVuKclDsgj/L728iZt/GyslkN4NwarledZATCenbk4Offjk1hQmaAA==}
@@ -3492,6 +3499,11 @@ snapshots:
   '@mongodb-js/saslprep@1.4.4':
     dependencies:
       sparse-bitfield: 3.0.3
+
+  '@neondatabase/serverless@1.0.2':
+    dependencies:
+      '@types/node': 22.19.7
+      '@types/pg': 8.11.11
 
   '@next/env@16.1.1': {}
 

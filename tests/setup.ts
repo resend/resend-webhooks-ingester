@@ -22,6 +22,9 @@ export const TEST_CONFIG = {
       process.env.POSTGRESQL_URL ||
       'postgres://postgres:postgres@localhost:5432/resend_test',
   },
+  neon: {
+    url: process.env.NEON_DATABASE_URL || '',
+  },
   mysql: {
     url:
       process.env.MYSQL_URL || 'mysql://root:mysql@localhost:3306/resend_test',
