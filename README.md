@@ -301,6 +301,7 @@ The project includes integration tests for MongoDB, PostgreSQL, MySQL, and Click
 
 **Cloud-only connectors** (require real accounts, not run in CI):
 - **Supabase** - Requires real Supabase project credentials
+- **Neon** - Requires a Neon database and connection string
 - **PlanetScale** - Requires real PlanetScale account (uses same schema as MySQL)
 - **Snowflake** - Requires real Snowflake account
 - **BigQuery** - Requires real GCP project
@@ -335,6 +336,7 @@ Or run tests for a specific connector:
 pnpm test:mongodb
 pnpm test:supabase
 pnpm test:postgresql
+pnpm test:neon
 pnpm test:mysql
 pnpm test:clickhouse
 ```
