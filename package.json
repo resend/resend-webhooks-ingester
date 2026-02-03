@@ -39,7 +39,7 @@
     "pg": "8.13.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "snowflake-sdk": "1.15.0",
+    "snowflake-sdk": "2.0.4",
     "svix": "1.67.0"
   },
   "devDependencies": {
